@@ -1,16 +1,18 @@
-import express from 'express';
-import taskRoute from './routes/taskRoutes.js'
-const app=express();
-const port=3000
+import express from "express";
+import taskRoute from "./routes/taskRoutes.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./swagger/swagger.js";
+
+const app = express();
+const port = 3000;
 
 app.use(express.json());
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/',taskRoute);
+app.use("/", taskRoute);
 
-app.get('/',(req,res)=>{
-  res.send('Hello World'); 
-})
-app.listen(()=>{
-    console.log(`server is running on http://localhost:${port}`);
-})
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});

@@ -1,4 +1,4 @@
-import tasks from "../data/task.js";
+import tasks from "../data/tasks.js";
 
 // GET /
 export const root = (req, res) => {
@@ -110,6 +110,30 @@ export const updatetask = (req, res) => {
     return res.status(200).json({
       message: "Task updated successfully",
       task,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+export const deletetask = (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const index = tasks.findIndex((task) => task.id === id);
+
+    if (index === -1) {
+      return res.status(404).json({
+        error: `Task ${id} not found`,
+      });
+    }
+
+    const deletedTask = tasks.splice(index, 1);
+
+    return res.status(200).json({
+      message: "Task deleted successfully",
+      task: deletedTask[0],
     });
   } catch (error) {
     return res.status(500).json({
