@@ -1,55 +1,119 @@
-import Task from '../data/task.js'
-export const root=(req,res)=>{
-   try{
-     res.json({
-  "name": "Task API",
-  "version": "1.0",
-  "endpoints": ["/tasks"]
-})
-   }catch(error){
-    return res.status(500).json({
-      message:"Internal Server Error"
-    })
-   }
-}
-export const health=(req,res)=>{
-    res.json({
-  "status": "ok"
-})
-}
-export const alltask=async(req,res)=>{
-  try{
-    const taskdata=await Task.find();
-    if(!taskdata){
-      return res.status(404).json({
-        "error": "Task 99 not found"
-      })
-    }
+import tasks from "../data/task.js";
+
+// GET /
+export const root = (req, res) => {
+  try {
     return res.status(200).json({
-      taskdata,
-      message:"All Tasks"
-    })
-  }catch(error){
-    return res.status(500).json({
-      message:"Internal Server Error"
-    })
-  }
-}
-export const Singletask=async(req,res)=>{
-  try{
-    const tasks=await Task.findOne({id});
-    if(!tasks){
-      return res.status(404).json({
-        "error": "Task 99 not found"
-      })
-    }
-    return res.status(200).json({
-      tasks,
-      message:"Task is avaiable"
+      name: "Task API",
+      version: "1.0",
+      endpoints: ["/tasks"],
     });
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
-      message:"Internal Server Error"
-    })
+      message: "Internal Server Error",
+    });
   }
-}
+};
+
+// GET /health
+export const health = (req, res) => {
+  try {
+    return res.status(200).json({
+      status: "ok",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+// GET /tasks
+export const alltask = (req, res) => {
+  try {
+    return res.status(200).json(tasks);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+// GET /tasks/:id
+export const singletask = (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const task = tasks.find((t) => t.id === id);
+
+    if (!task) {
+      return res.status(404).json({
+        error: `Task ${id} not found`,
+      });
+    }
+
+    return res.status(200).json(task);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+// POST /tasks
+export const createtask = (req, res) => {
+  try {
+    const { title } = req.body;
+
+    if (!title) {
+      return res.status(400).json({
+        error: "Title is required",
+      });
+    }
+
+    const newTask = {
+      id: tasks.length + 1,
+      title,
+      done: false,
+    };
+
+    tasks.push(newTask);
+    return res.status(201).json(newTask);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const updatetask = (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { title, done } = req.body;
+
+    const task = tasks.find((t) => t.id === id);
+
+    if (!task) {
+      return res.status(404).json({
+        error: `Task ${id} not found`,
+      });
+    }
+
+    if (title !== undefined) {
+      task.title = title;
+    }
+
+    if (done !== undefined) {
+      task.done = done;
+    }
+
+    return res.status(200).json({
+      message: "Task updated successfully",
+      task,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
